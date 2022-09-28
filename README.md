@@ -20,5 +20,10 @@ para correrlo entrar a la carpeta y correr : ``flask run``
 
 ### Usuario
 
-aun sin hacer
+Para correrlo entrar a la carpeta usuario y correr : ``flask run -p 5002``
 
+1. Endpoints propuestos
+
+```bash
+-- GET: /ubicacion-usuario/{id_usuario}
+```
