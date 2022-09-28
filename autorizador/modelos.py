@@ -6,8 +6,8 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 roles_permisos = db.Table('rol_permiso',
-                             db.Column('rol_id', db.Integer, db.ForeignKey('rol.id'), primary_key=True),
-                             db.Column('permiso_id', db.Integer, db.ForeignKey('permiso.id'), primary_key=True))
+                          db.Column('rol_id', db.Integer, db.ForeignKey('rol.id'), primary_key=True),
+                          db.Column('permiso_id', db.Integer, db.ForeignKey('permiso.id'), primary_key=True))
 
 
 class Permiso(db.Model):
@@ -28,6 +28,7 @@ class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     usuario = db.Column(db.String(50))
     contrasena = db.Column(db.String(50))
+    token = db.Column(db.String(500))
     id_rol = db.Column(db.Integer, db.ForeignKey('rol.id'))
     rol = db.relationship('Rol', foreign_keys=[id_rol], single_parent=True)
 

@@ -1,3 +1,6 @@
+import json
+
+import jwt
 from flask import Flask, request
 from requests import get, post, put
 
@@ -10,10 +13,7 @@ MS_USUARIO_HOST = "http://localhost:3000"
 @app.route("/<path:path>")
 def proxy(path):
     print(request.headers)
-    method = request.method
-
-    # Peticion para obtener/destruir el token
-    if path == 'autorizador/login' or path == 'autorizador/logout':
+    if path == 'autorizador/login' or path == 'autorizador/logout' or path == 'autorizador/validate':
         return resolveRequest(MS_AUTORIZADOR_HOST, request, path)
     else:
         if validateToken(request):
@@ -34,13 +34,21 @@ def resolveRequest(micro, request_mod, path):
         if method == 'PUT':
             return put(url=new_url, data=request.data).content
 
-    switch(method)
+    return switch(method)
 
 
 def validateToken(request_mod):
     print(request_mod.headers['Authorization'])
-    # TODO: validar el token
-    return False
+    header_token = request_mod.headers['Authorization']
+    try:
+        decoded = jwt.decode(header_token, options={"verify_signature": False})
+    except jwt.exceptions.DecodeError:
+        return False
+    validateREsp = get(url=f'{MS_AUTORIZADOR_HOST}/autorizador/validate',
+                       headers={'Authorization': header_token}).content
+    data = json.loads(validateREsp)
+    print(data)
+    return data['valid'] | False
 
 
 app.run(host="0.0.0.0", port=8080)

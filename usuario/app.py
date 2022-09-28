@@ -21,10 +21,14 @@ cors = CORS(app, resources={r'*': {"origins": "*"}})
 
 api = Api(app)
 
-@app.route('/ubicacion-usuario/<id_usuario>')
+usuario_schema = UsuarioSchema()
+
+
+@app.route('/usuario/<id_usuario>', methods=['GET'])
 def get(id_usuario):
     usuario = usuario_schema.dump(Usuario.query.get_or_404(id_usuario))
-    return jsonify({"usuario": usuario})
+    return usuario_schema.dump(usuario)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

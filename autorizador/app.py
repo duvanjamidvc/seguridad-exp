@@ -1,8 +1,11 @@
 from flask_cors import CORS
 from flask import Flask, jsonify, request
 from flask_restful import Api, Resource
+from sqlalchemy import text
+
 from modelos import db, Usuario, UsuarioSchema
 from flask_jwt_extended import create_access_token, JWTManager, jwt_required
+from secrets import compare_digest
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///micro-autorizador.db.sqlite'
@@ -30,28 +33,35 @@ def post():
                                    Usuario.contrasena == request.json["contrasena"]).first()
 
     if usuario is None:
-        return "El usuario no existe", 404
+        return {"message": "El usuario no existe"}, 404
     else:
         token_de_acceso = create_access_token(identity=usuario.id,
                                               additional_claims={
                                                   "rol": usuario.rol.id
                                               })
+        usuario.token = token_de_acceso
+        db.session.add(usuario)
+        db.session.commit()
         return {"status": "success", "token-access": token_de_acceso}
 
 
-@app.route('/autorizador/logout')
-class APILogout(Resource):
-    def post(self):
-        # TODO:Destruir token
-        return {"message": "Token destruido"}
-
-
-@app.route('/autorizador/validate')
-@jwt_required()
-def APIValidate():
-    print(request.json["url"])
-
+@app.route('/autorizador/logout', methods=['GET'])
+def logout():
+    usuario = Usuario.query.filter(Usuario.token == request.headers["Authorization"]).first()
+    if usuario:
+        usuario.token = None
+        db.session.add(usuario)
+        db.session.commit()
     return {"success": True}
+
+
+@app.route('/autorizador/validate', methods=['GET'])
+def validate():
+    usuario = Usuario.query.filter(Usuario.token == request.headers["Authorization"]).first()
+    if usuario:
+        return {"valid": True}
+    else:
+        return {"valid": False}, 403
 
 
 if __name__ == '__main__':
