@@ -10,7 +10,7 @@ MS_USUARIO_HOST = "http://localhost:3000"
 
 
 @app.route("/", defaults={"path": ""})
-@app.route("/<path:path>")
+@app.route("/<path:path>", methods=['GET', 'POST', 'PUT', 'DELETE'])
 def proxy(path):
     print(request.headers)
     if path == 'autorizador/login' or path == 'autorizador/logout' or path == 'autorizador/validate':
@@ -25,14 +25,15 @@ def proxy(path):
 def resolveRequest(micro, request_mod, path):
     method = request_mod.method
     new_url = f'{micro}/{path}'
+    print(f'>> {method}:{new_url}')
 
     def switch(method):
         if method == 'GET':
-            return get(url=new_url).content
+            return get(url=new_url, headers=request_mod.headers).content
         if method == 'POST':
-            return post(url=new_url, data=request.data).content
+            return post(url=new_url, data=request.data, headers=request_mod.headers).content
         if method == 'PUT':
-            return put(url=new_url, data=request.data).content
+            return put(url=new_url, data=request.data, headers=request_mod.headers).content
 
     return switch(method)
 
@@ -47,8 +48,13 @@ def validateToken(request_mod):
     validateREsp = get(url=f'{MS_AUTORIZADOR_HOST}/autorizador/validate',
                        headers={'Authorization': header_token}).content
     data = json.loads(validateREsp)
-    print(data)
     return data['valid'] | False
+
+
+@app.after_request
+def add_header(response):
+    response.headers['Content-Type'] = 'application/json'
+    return response
 
 
 app.run(host="0.0.0.0", port=8080)

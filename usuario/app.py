@@ -1,5 +1,5 @@
 from flask_cors import CORS
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_restful import Api
 
 from modelos import db, UsuarioSchema, Usuario
@@ -28,6 +28,15 @@ usuario_schema = UsuarioSchema()
 def get(id_usuario):
     usuario = usuario_schema.dump(Usuario.query.get_or_404(id_usuario))
     return usuario_schema.dump(usuario)
+
+
+@app.route('/usuario', methods=['POST'])
+def post():
+    new_usuario = Usuario(nombre=request.json["nombre"], correo=request.json["correo"], latitud=request.json["latitud"],
+                          longitud=request.json["longitud"])
+    db.session.add(new_usuario)
+    db.session.commit()
+    return usuario_schema.dump(new_usuario)
 
 
 if __name__ == '__main__':
