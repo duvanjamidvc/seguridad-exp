@@ -24,13 +24,12 @@ api = Api(app)
 usuario_schema = UsuarioSchema()
 
 
-@app.route('/usuario/<id_usuario>', methods=['GET'])
-def get(id_usuario):
-    usuario = usuario_schema.dump(Usuario.query.get_or_404(id_usuario))
-    return usuario_schema.dump(usuario)
+@app.route('/usuarios', methods=['GET'])
+def get():
+    return [usuario_schema.dump(usuario) for usuario in Usuario.query.all()]
 
 
-@app.route('/usuario', methods=['POST'])
+@app.route('/crear-usuario', methods=['POST'])
 def post():
     new_usuario = Usuario(nombre=request.json["nombre"], correo=request.json["correo"], latitud=request.json["latitud"],
                           longitud=request.json["longitud"])
