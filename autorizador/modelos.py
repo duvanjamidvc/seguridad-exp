@@ -2,6 +2,7 @@ from marshmallow import fields, Schema
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 import enum
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
 
 db = SQLAlchemy()
 
@@ -33,18 +34,27 @@ class Usuario(db.Model):
     rol = db.relationship('Rol', foreign_keys=[id_rol], single_parent=True)
 
 
+class LogAccess(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    token = db.Column(db.String(50))
+    user_id = db.Column(db.Numeric())
+    fecha = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    target = db.Column(db.String(500))
+    allowed = db.Column(db.Boolean())
+
+
+class PermisoSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = Permiso
+        include_relationships = True
+        load_instance = True
+
+
 class EnumATipoUsuario(fields.Field):
     def _serialize(self, value, attr, obj, **kwargs):
         if value is None:
             return None
         return value.value
-
-
-class UsuarioSchema(SQLAlchemyAutoSchema):
-    class Meta:
-        model = Usuario
-        include_relationships = True
-        load_instance = True
 
 
 class RolSchema(SQLAlchemyAutoSchema):
@@ -53,12 +63,16 @@ class RolSchema(SQLAlchemyAutoSchema):
         include_relationships = True
         load_instance = True
 
+    permisos = fields.List(fields.Nested(PermisoSchema()))
 
-class PermisoSchema(SQLAlchemyAutoSchema):
+
+class UsuarioSchema(SQLAlchemyAutoSchema):
     class Meta:
-        model = Permiso
+        model = Usuario
         include_relationships = True
         load_instance = True
+
+    rol = fields.Nested(RolSchema())
 
 
 class ResponseSchema(Schema):

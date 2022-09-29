@@ -16,7 +16,7 @@ def proxy(path):
     if path == 'autorizador/login' or path == 'autorizador/logout' or path == 'autorizador/validate':
         return resolveRequest(MS_AUTORIZADOR_HOST, request, path)
     else:
-        if validateToken(request):
+        if validateToken(request, f'/{path}'):
             return resolveRequest(MS_USUARIO_HOST, request, path)
         else:
             return {"ERROR": "Un-Authorized"}, 403
@@ -38,15 +38,11 @@ def resolveRequest(micro, request_mod, path):
     return switch(method)
 
 
-def validateToken(request_mod):
+def validateToken(request_mod, targetPath):
     print(request_mod.headers['Authorization'])
     header_token = request_mod.headers['Authorization']
-    try:
-        decoded = jwt.decode(header_token, options={"verify_signature": False})
-    except jwt.exceptions.DecodeError:
-        return False
-    validateREsp = get(url=f'{MS_AUTORIZADOR_HOST}/autorizador/validate',
-                       headers={'Authorization': header_token}).content
+    validateREsp = post(url=f'{MS_AUTORIZADOR_HOST}/autorizador/validate', data={"targetPath": targetPath},
+                        headers={'Authorization': header_token}).content
     data = json.loads(validateREsp)
     return data['valid'] | False
 
