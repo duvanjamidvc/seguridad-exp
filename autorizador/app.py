@@ -108,5 +108,11 @@ def validate():
         return {"valid": False}, 403
 
 
+@app.after_request
+def add_header(response):
+    response.headers['Content-Type'] = 'application/json'
+    return response
+
+
 if __name__ == '__main__':
     app.run(debug=True)

@@ -39,10 +39,13 @@ def resolveRequest(micro, request_mod, path):
 
 
 def validateToken(request_mod, targetPath):
-    print(request_mod.headers['Authorization'])
     header_token = request_mod.headers['Authorization']
-    validateREsp = post(url=f'{MS_AUTORIZADOR_HOST}/autorizador/validate', data={"targetPath": targetPath},
-                        headers={'Authorization': header_token}).content
+    validateREsp = post(url=f'{MS_AUTORIZADOR_HOST}/autorizador/validate',
+                        json={'targetPath': targetPath},
+                        headers={
+                            'Authorization': header_token,
+                            'Content-Type': 'application/json'
+                        }).content
     data = json.loads(validateREsp)
     return data['valid'] | False
 
