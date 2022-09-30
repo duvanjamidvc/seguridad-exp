@@ -92,20 +92,20 @@ def validate():
     authorization_token = request.headers["Authorization"]
     allowed = False
     user_id = None
+    target_path = request.json['targetPath']
     try:
         decoded = jwt.decode(authorization_token, options={"verify_signature": False})
         usuario = Usuario.query.filter(Usuario.token == authorization_token).first()
         print(usuario_scheme.dump(usuario))
         user_id = decoded['id']
         if usuario:
-            targetPath = request.json['targetPath']
-            allowed = validatePath(usuario_scheme.dump(usuario), targetPath)
+            allowed = validatePath(usuario_scheme.dump(usuario), target_path)
         else:
             allowed = False
     except jwt.exceptions.DecodeError:
         allowed = False
 
-    log(authorization_token, user_id, targetPath, allowed)
+    log(authorization_token, user_id, target_path, allowed)
     if allowed:
         return {"valid": True}
     else:

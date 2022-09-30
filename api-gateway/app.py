@@ -17,7 +17,10 @@ def proxy(path):
         return resolveRequest(MS_AUTORIZADOR_HOST, request, path)
     else:
         if validateToken(request, f'/{path}'):
-            return resolveRequest(MS_USUARIO_HOST, request, path)
+            if path == 'autorizador/actualizar-rol':
+                return resolveRequest(MS_AUTORIZADOR_HOST, request, path)
+            else:
+                return resolveRequest(MS_USUARIO_HOST, request, path)
         else:
             return {"ERROR": "Un-Authorized"}, 403
 
