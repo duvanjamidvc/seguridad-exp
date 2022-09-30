@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 from flask_cors import CORS
 from flask import Flask, jsonify, request
 from flask_restful import Api, Resource
@@ -56,7 +56,7 @@ def login():
     else:
         token_de_acceso = create_access_token(identity=usuario.id,
                                               additional_claims=usuario_scheme.dump(usuario),
-                                              expires_delta=timedelta(minutes=1))
+                                              expires_delta=timedelta(minutes=2))
         usuario.token = token_de_acceso
         db.session.add(usuario)
         db.session.commit()
@@ -95,13 +95,20 @@ def validate():
     target_path = request.json['targetPath']
     try:
         decoded = jwt.decode(authorization_token, options={"verify_signature": False})
-        usuario = Usuario.query.filter(Usuario.token == authorization_token).first()
-        print(usuario_scheme.dump(usuario))
-        user_id = decoded['id']
-        if usuario:
-            allowed = validatePath(usuario_scheme.dump(usuario), target_path)
-        else:
+
+        now = datetime.now(timezone.utc)
+        target_timestamp = datetime.timestamp(now + timedelta(minutes=1))
+        if target_timestamp > decoded['exp']:
             allowed = False
+        else:
+            print('----->',decoded)
+            usuario = Usuario.query.filter(Usuario.token == authorization_token).first()
+            print(usuario_scheme.dump(usuario))
+            user_id = decoded['id']
+            if usuario:
+                allowed = validatePath(usuario_scheme.dump(usuario), target_path)
+            else:
+                allowed = False
     except jwt.exceptions.DecodeError:
         allowed = False
 
