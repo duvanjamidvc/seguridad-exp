@@ -108,6 +108,14 @@ def validate():
         return {"valid": False}, 403
 
 
+@app.route('/autorizador/actualizar-rol', methods=['POST'])
+def update():
+    usuario = Usuario.query.get_or_404(request.json.get('id_usuario'))
+    usuario.id_rol = request.json.get("id_rol")
+    db.session.commit()
+    return usuario_scheme.dump(usuario)
+
+
 @app.after_request
 def add_header(response):
     response.headers['Content-Type'] = 'application/json'
