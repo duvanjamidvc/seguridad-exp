@@ -1,7 +1,9 @@
+from datetime import timedelta
 from flask_cors import CORS
 from flask import Flask, jsonify, request
 from flask_restful import Api, Resource
 import jwt
+
 
 from modelos import db, Usuario, UsuarioSchema, LogAccess
 from flask_jwt_extended import create_access_token, JWTManager
@@ -53,7 +55,8 @@ def login():
         return {"message": "El usuario no existe"}, 404
     else:
         token_de_acceso = create_access_token(identity=usuario.id,
-                                              additional_claims=usuario_scheme.dump(usuario))
+                                              additional_claims=usuario_scheme.dump(usuario),
+                                              expires_delta=timedelta(minutes=1))
         usuario.token = token_de_acceso
         db.session.add(usuario)
         db.session.commit()
@@ -68,7 +71,8 @@ def signin():
     db.session.add(usuario)
     db.session.commit()
     token_de_acceso = create_access_token(identity=usuario.id,
-                                          additional_claims=usuario_scheme.dump(usuario))
+                                          additional_claims=usuario_scheme.dump(usuario),
+                                          expires_delta=timedelta(minutes=1))
     usuario.token = token_de_acceso
     return {"status": "success", "token-access": token_de_acceso}
 
