@@ -4,26 +4,27 @@
 
 ### Api-gateway
 
-para correrlo entrar a la carpeta y correr : ``flask run``, sirve como un proxy para las peticiones
+Para ejecutarlo entrar a la carpeta /api-gateway y ejecutar el comando: ``flask run -p 8080``, sirve como un proxy para las peticiones
 
 ### Autorizador
 
-para correrlo entrar a la carpeta y correr : ``flask run``
+Para ejecutarlo entrar a la /carpeta y ejecutar el comando : ``flask run -p 5000``
 
 1. Endpoints propuestos
 
 ```bash
--- POST: /autorizador/login {usuario:string, password:string}
+-- POST: /autorizador/login BODY {usuario:string, password:string}
 -- POST: /autorizador/logout header:{Authorization: [token]}
 -- GET: /autorizador/validate/{TOKEN} 
+-- POST: /autorizador/actualizar-rol header:{Authorization: [token]} BODY {id_rol:number, id_usuario:number}
 ```
 
 ### Usuario
 
-Para correrlo entrar a la carpeta usuario y correr : ``flask run -p 5002``
+Para ejecutarlo entrar a la carpeta /usuario y ejecutar el comando : ``flask run -p 3000``
 
 1. Endpoints propuestos
 
 ```bash
--- GET: /ubicacion-usuario/{id_usuario}
+-- GET: /usuarios
 ```

@@ -55,7 +55,7 @@ def login():
         return {"message": "El usuario no existe"}, 404
     else:
         token_de_acceso = create_access_token(identity=usuario.id,
-                                              additional_claims=usuario_scheme.dump(usuario),
+                                              additional_claims={'id': usuario.id},
                                               expires_delta=timedelta(minutes=2))
         usuario.token = token_de_acceso
         db.session.add(usuario)
@@ -71,7 +71,7 @@ def signin():
     db.session.add(usuario)
     db.session.commit()
     token_de_acceso = create_access_token(identity=usuario.id,
-                                          additional_claims=usuario_scheme.dump(usuario),
+                                          additional_claims={'id': usuario.id},
                                           expires_delta=timedelta(minutes=1))
     usuario.token = token_de_acceso
     return {"status": "success", "token-access": token_de_acceso}
